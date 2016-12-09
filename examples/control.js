@@ -23,7 +23,7 @@ speaker
 			var player = result.payload[0];
 
 			// get state
-			speaker.playerGetPlayState( player.pid, ( err, result ) => {
+			speaker.playerGetNowPlayingMedia( player.pid, ( err, result ) => {
 				if( err ) return console.trace( 'playerGetPlayState err', err );
 
 				console.log('playerGetPlayState', result);
