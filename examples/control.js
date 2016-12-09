@@ -4,19 +4,63 @@ const DenonHeos = require('..').DenonHeos;
 
 const address = process.argv[2] || 'emile-heos.local';
 
-var speaker = new DenonHeos( address );
-	speaker.connect(( err ) => {
+let speaker = new DenonHeos( address )
+speaker
+	.connect(( err ) => {
 		if( err ) return console.error( err );
 
 		console.log('Connected!');
 
-		speaker.send('player/get_players', ( err, result ) => {
-			console.log('data', err, result);
+		// get all players
+		speaker.playerGetPlayers( ( err, result ) => {
+			if( err ) return console.error( 'playerGetPlayers', err );
 
-			speaker.disconnect(( err ) => {
-				if( err ) return console.error( err );
+			console.log('playerGetPlayers', result);
 
-				console.log('Disconnected!');
+			if( result.length < 1 )
+				return console.error('no players found');
+
+			var player = result.payload[0];
+
+			// get state
+			speaker.playerGetPlayState( player.pid, ( err, result ) => {
+				if( err ) return console.trace( 'playerGetPlayState err', err );
+
+				console.log('playerGetPlayState', result);
+
+				// start playing
+				speaker.playerSetPlayState( player.pid, 'play', ( err, result ) => {
+					if( err ) return console.error( 'playerSetPlayState err', err );
+
+					console.log('playerSetPlayState', result);
+
+					// pause after 1s
+					setTimeout(() => {
+						speaker.playerSetPlayState( player.pid, 'pause', ( err, result ) => {
+							if( err ) return console.error( 'playerSetPlayState err', err );
+
+							console.log('playerSetPlayState', result);
+
+							// disconnect
+							setTimeout(() => {
+								speaker.disconnect(( err ) => {
+									if( err ) return console.error( err );
+
+									console.log('Disconnected!');
+								})
+							}, 5000);
+
+						});
+					}, 1000);
+
+				});
+
 			})
 		})
+	})
+	.on('event', ( data ) => {
+		console.log('onEvent', data )
+	})
+	.on('player_state_changed', ( message ) => {
+		console.log('onPlayerStateChanged', message);
 	})
