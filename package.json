@@ -9,5 +9,6 @@
   "author": "Emile Nijssen",
   "license": "ISC",
   "dependencies": {
+    "node-ssdp-lite": "^0.2.0"
   }
 }
