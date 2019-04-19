@@ -1,12 +1,13 @@
 {
   "name": "denon-heos",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Denon Heos client for Node.js",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Emile Nijssen",
+  "homepage": "https://github.com/WeeJeWel/node-denon-heos",
   "license": "ISC",
   "dependencies": {
     "node-ssdp-lite": "^0.2.0"
