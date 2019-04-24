@@ -1,9 +1,9 @@
 'use strict';
 
-const Discover = require('..').Discover;
+const { Discover } = require('..');
 
-let discover = new Discover();
-	discover.on('device', ( device ) => {
-		console.log('onDevice', device)
-	})
-	discover.start();
+const discover = new Discover();
+discover.on('device', ( device ) => {
+	console.log('onDevice', device)
+})
+discover.start();

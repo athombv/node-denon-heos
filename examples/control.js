@@ -1,66 +1,102 @@
 'use strict';
 
-const DenonHeos = require('..').DenonHeos;
+const {
+  Discover,
+  DenonHeos,
+} = require('..');
 
-const address = process.argv[2] || 'emile-heos.local';
+const name = process.argv[2] || 'Heos 1';
+console.log('Trying to find a device named:', name);
 
-let speaker = new DenonHeos( address )
-speaker
-	.connect(( err ) => {
-		if( err ) return console.error( err );
+const discover = new Discover();
+discover.on('device', ( device ) => {
+  if( device.friendlyName === name ) {
+    console.log(`Found ${name} @ ${device.address}`);
+    onSpeaker(device.instance).catch(console.error);
+  }
+});
+discover.start();
 
-		console.log('Connected!');
-
-		// get all players
-		speaker.playerGetPlayers( ( err, result ) => {
-			if( err ) return console.error( 'playerGetPlayers', err );
-
-			console.log('playerGetPlayers', result);
-
-			if( result.length < 1 )
-				return console.error('no players found');
-
-			var player = result.payload[0];
-
-			// get state
-			speaker.playerGetNowPlayingMedia( player.pid, ( err, result ) => {
-				if( err ) return console.trace( 'playerGetPlayState err', err );
-
-				console.log('playerGetPlayState', result);
-
-				// start playing
-				speaker.playerSetPlayState( player.pid, 'play', ( err, result ) => {
-					if( err ) return console.error( 'playerSetPlayState err', err );
-
-					console.log('playerSetPlayState', result);
-
-					// pause after 1s
-					setTimeout(() => {
-						speaker.playerSetPlayState( player.pid, 'pause', ( err, result ) => {
-							if( err ) return console.error( 'playerSetPlayState err', err );
-
-							console.log('playerSetPlayState', result);
-
-							// disconnect
-							setTimeout(() => {
-								speaker.disconnect(( err ) => {
-									if( err ) return console.error( err );
-
-									console.log('Disconnected!');
-								})
-							}, 5000);
-
-						});
-					}, 1000);
-
-				});
-
-			})
-		})
+async function onSpeaker( speaker ) {
+	
+	speaker.on('state', state => {
+  	console.log('State:', state);
 	})
-	.on('event', ( data ) => {
-		console.log('onEvent', data )
+	speaker.on('event', data => {
+  	console.log('Event:', data);
+	});
+	speaker.on('connecting', () => {
+  	console.log('Connecting...');
 	})
-	.on('player_state_changed', ( message ) => {
-		console.log('onPlayerStateChanged', message);
-	})
+  speaker.on('disconnect', () => {
+  	console.log('Disconnected');
+	});
+  speaker.on('disconnecting', () => {
+  	console.log('Disconnecting...');
+	});
+  speaker.on('reconnecting', () => {
+  	console.log('Reconnecting...');
+	});
+  speaker.on('reconnected', () => {
+  	console.log('Reconnected', speaker.address);
+	});
+	
+  await speaker.connect();
+	
+	const players = await speaker.playerGetPlayers();
+	console.log('playerGetPlayers', players);
+	
+	if( players.length < 1 )
+	  throw new Error('No players found');
+	 
+	 const [ player ] = players;
+	 const { pid } = player;
+	 
+	 const playerGetPlayerInfo = await speaker.playerGetPlayerInfo({ pid });
+	 console.log('playerGetPlayerInfo', playerGetPlayerInfo);
+	 
+	 const playerGetPlayState = await speaker.playerGetPlayState({ pid });
+	 console.log('playerGetPlayState', playerGetPlayState);
+	 
+	 const playerGetNowPlayingMedia = await speaker.playerGetNowPlayingMedia({ pid });
+	 console.log('playerGetNowPlayingMedia', playerGetNowPlayingMedia);
+	 
+	 const playerGetVolume = await speaker.playerGetVolume({ pid });
+	 console.log('playerGetVolume', playerGetVolume);
+	 
+	 const playerSetVolume = await speaker.playerSetVolume({
+     pid,
+     level: parseInt(playerGetVolume.level),
+   });
+	 console.log('playerSetVolume', playerSetVolume);
+	 
+	 const playerGetMute = await speaker.playerGetMute({ pid });
+	 console.log('playerGetMute', playerGetMute);
+	 
+	 const playerSetMute = await speaker.playerSetMute({ pid, mute: true });
+	 console.log('playerSetMute', playerSetMute);
+	 
+	 const playerGetPlayMode = await speaker.playerGetPlayMode({ pid });
+	 console.log('playerGetPlayMode', playerGetPlayMode);
+	 
+	 const playerSetPlayMode = await speaker.playerSetPlayMode({
+  	 pid,
+  	 shuffle: true,
+	 });
+	 console.log('playerSetPlayMode', playerSetPlayMode);
+	 
+	 await wait(5000);
+	 await speaker.disconnect();
+	 
+	 await wait(5000);
+	 await speaker.connect();
+	 
+	 const playerGetPlayerInfo2 = await speaker.playerGetPlayerInfo({ pid });
+	 console.log('playerGetPlayerInfo2', playerGetPlayerInfo2);
+}
+
+async function wait(timeout) {
+  return new Promise(resolve => {
+    setTimeout(resolve, timeout);
+  })
+}

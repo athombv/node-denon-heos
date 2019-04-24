@@ -1,24 +1,33 @@
-#denon-heos
+# Denon Heos
 
 This is a module to control Denon Heos speakers using Node.js. Not all API calls are added yet, but it should be good enough for use.
 
-It allows you to:
-
-* Discover speakers
-* Connect to a speaker
+* Discover speakers (Wi-Fi & LAN)
 * Send commands (e.g. play, pause, set volume)
-* Listen to events from a speaker (e.g. state changed, volume changed)
-
-## TODO
-
-* Add more API methods (help is welcome, see `./assets/docs/` for the specifications.
-* Rewrite to promises instead of callbacks
+* Listen to events from a speaker (e.g. track or volume changed)
+* Automatically reconnect (even if the device's IP has changed 🎉)
 
 ## Installation
 ```
 npm install denon-heos
 ```
 
-## Usage
-For an example, see `./examples/control.js`.
+## Example
+```javascript
+const { Discover } = require('denon-heos');
+const discover = new Discover();
+discover.on('device', ( device ) => {
+  device.instance.connect().then(async () => {
+    const info = await device.instance.playerGetPlayerInfo();
+    console.log(info);
+  }).catch(console.error);
+})
+discover.start();
+```
+
+For more examples, see `./examples`.
+
+## Contributing
+
+More API methods need to be added. Help is welcome, see `./assets/docs/` for the specifications.
 

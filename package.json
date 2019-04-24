@@ -1,6 +1,6 @@
 {
   "name": "denon-heos",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "Denon Heos client for Node.js",
   "main": "index.js",
   "scripts": {
