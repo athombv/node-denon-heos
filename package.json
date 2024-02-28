@@ -1,5 +1,5 @@
 {
-  "name": "denon-heos",
+  "name": "@athombv/denon-heos",
   "version": "2.1.0",
   "description": "Denon Heos client for Node.js",
   "main": "index.js",
