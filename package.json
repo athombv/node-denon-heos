@@ -3,6 +3,10 @@
   "version": "2.1.0",
   "description": "Denon Heos client for Node.js",
   "main": "index.js",
+  "files": [
+    "/lib",
+    "/index.js"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
